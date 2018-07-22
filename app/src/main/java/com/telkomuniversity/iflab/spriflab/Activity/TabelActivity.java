@@ -1,11 +1,13 @@
-package com.telkomuniversity.iflab.spriflab;
+package com.telkomuniversity.iflab.spriflab.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.Toast;
+
+import com.telkomuniversity.iflab.spriflab.Model.BookingInfo;
+import com.telkomuniversity.iflab.spriflab.R;
+import com.telkomuniversity.iflab.spriflab.Adapter.RecyclerViewAdapter;
 
 import java.util.ArrayList;
 
@@ -28,7 +30,7 @@ public class TabelActivity extends AppCompatActivity {
         rv.setAdapter(rvAdapter);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-
+        setTitle("Booking list");
     }
 
     // Toast.makeText(TabelActivity.this, "Clicked", Toast.LENGTH_SHORT).show();

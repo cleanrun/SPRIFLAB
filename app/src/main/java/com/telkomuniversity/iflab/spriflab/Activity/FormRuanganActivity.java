@@ -1,12 +1,13 @@
-package com.telkomuniversity.iflab.spriflab;
+package com.telkomuniversity.iflab.spriflab.Activity;
 
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,15 +15,21 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.telkomuniversity.iflab.spriflab.ApiUtils.APIProperties;
+import com.telkomuniversity.iflab.spriflab.ApiUtils.UserService;
+import com.telkomuniversity.iflab.spriflab.Model.BookingInfo;
+import com.telkomuniversity.iflab.spriflab.R;
 
-import java.sql.Date;
 import java.util.Calendar;
 import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FormRuanganActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -32,6 +39,7 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
     private Spinner spinnerRuangan, spinnerWaktuMulai, spinnerWaktuSelesai;
     private Button btnDate, btnSubmit;
     private ProgressBar progressBar;
+    private ScrollView scrollViewForm;
 
     // isi spinner
     private static final String[] itemSpinnerRuangan = {"IFLAB1", "IFLAB2", "IFLAB3",
@@ -44,14 +52,21 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
     // datepicker variabel
     private DatePickerDialog.OnDateSetListener dateListener;
 
-    // request codes
+    // api properties
     public static final int CODE_GET_REQUEST = 1024;
     public static final int CODE_POST_REQUEST = 1025;
+    private UserService userService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_ruangan);
+
+        scrollViewForm = findViewById(R.id.scrollViewForm);
+
+        setTitle("Booking Form");
+
+        userService = APIProperties.getUserService();
 
         progressBar = findViewById(R.id.progressBar);
 
@@ -139,6 +154,7 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
             }
         };
 
+
     }
 
 
@@ -146,21 +162,12 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         if(view == btnSubmit){
             try {
-                int spn1 = spinnerWaktuMulai.getSelectedItemPosition();
-                int spn2 = spinnerWaktuSelesai.getSelectedItemPosition();
+                //Toast.makeText(FormRuanganActivity.this, "Under Maintenance", Toast.LENGTH_SHORT).show();
+                createBooking();
 
-                if(spn1 == 0){
-                    Toast.makeText(FormRuanganActivity.this, "Waktu Mulai harap diisi", Toast.LENGTH_SHORT).show();
-                }
-                else if(spn2 == 0){
-                    Toast.makeText(FormRuanganActivity.this, "Waktu Selesai harap diisi", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    //Toast.makeText(FormRuanganActivity.this, "Under Maintenance", Toast.LENGTH_SHORT).show();
-                    createBooking();
-                }
             } catch(Exception e){
-                Toast.makeText(FormRuanganActivity.this, "Exception detected!", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+                Toast.makeText(FormRuanganActivity.this, "Exception detected" , Toast.LENGTH_SHORT).show();
             }
         }
         else if(view == btnDate){
@@ -196,6 +203,9 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
         String waktuSelesai = spinnerWaktuSelesai.getSelectedItem().toString();
 
         String tanggal = etDate.getText().toString().trim();
+
+        int spn1 = spinnerWaktuMulai.getSelectedItemPosition();
+        int spn2 = spinnerWaktuSelesai.getSelectedItemPosition();
 
         if(TextUtils.isEmpty(name)){
             etNama.setError("Silahkan masukkan nama anda.");
@@ -237,10 +247,18 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
             etDate.requestFocus();
             return;
         }
+        else if(spn1 == 0){
+            Toast.makeText(FormRuanganActivity.this, "Waktu Mulai harap diisi", Toast.LENGTH_SHORT).show();
+            spinnerWaktuMulai.requestFocus();
+        }
+        else if(spn2 == 0){
+            Toast.makeText(FormRuanganActivity.this, "Waktu Selesai harap diisi", Toast.LENGTH_SHORT).show();
+            spinnerWaktuSelesai.requestFocus();
+        }
 
         // tanggal start sama end nya masih fix di tanggal ini belom dirubah jadi editable
         HashMap<String, String> params = new HashMap<>();
-        params.put("nim", nim);
+        params.put("title", nim);
         params.put("start", "10/16/2018");
         params.put("end", "10/17/2018");
         params.put("nama", name);
@@ -254,54 +272,30 @@ public class FormRuanganActivity extends AppCompatActivity implements View.OnCli
         params.put("mulai", waktuMulai);
         params.put("selesai", waktuSelesai);
 
-        PerformNetworkRequest request = new PerformNetworkRequest(APIProperties.CREATE_BOOKING_URL, params, CODE_POST_REQUEST);
-        request.execute();
+        addBooking(params);
 
     }
 
-    private class PerformNetworkRequest extends AsyncTask<Void, Void, String>{
-        String url;
-        HashMap<String, String> params;
-        int requestCode;
 
-        public PerformNetworkRequest(String url, HashMap<String, String> params, int requestCode) {
-            this.url = url;
-            this.params = params;
-            this.requestCode = requestCode;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            progressBar.setVisibility(View.GONE);
-            try{
-                JSONObject object = new JSONObject(s);
-                if(!object.getBoolean("error")){
-                    Toast.makeText(getApplicationContext(), object.getString("message"), Toast.LENGTH_SHORT).show();
+    private void addBooking(HashMap<String, String> booking){
+        Call<BookingInfo> call = userService.addBooking(booking);
+        call.enqueue(new Callback<BookingInfo>() {
+            @Override
+            public void onResponse(Call<BookingInfo> call, Response<BookingInfo> response) {
+                Log.i("RESPONSE", response.toString());
+                if(response.isSuccessful()){
+                    //Toast.makeText(FormRuanganActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                    Log.i("API RESPONSE", response.body().toString());
+                    Snackbar.make(scrollViewForm, "Data successfully inputted", Snackbar.LENGTH_SHORT).show();
                 }
-            }catch(JSONException e){
-                e.printStackTrace();
             }
-        }
 
-        @Override
-        protected String doInBackground(Void... voids) {
-            RequestHandler requestHandler = new RequestHandler();
-
-            if (requestCode == CODE_POST_REQUEST)
-                return requestHandler.sendPostRequest(url, params);
-
-
-            if (requestCode == CODE_GET_REQUEST)
-                return requestHandler.sendGetRequest(url);
-
-            return null;
-        }
+            @Override
+            public void onFailure(Call<BookingInfo> call, Throwable t) {
+                Log.e("ERROR: ", t.getMessage());
+                Toast.makeText(FormRuanganActivity.this, "ERROR: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 }

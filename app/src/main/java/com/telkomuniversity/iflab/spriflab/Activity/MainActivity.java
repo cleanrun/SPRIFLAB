@@ -1,4 +1,4 @@
-package com.telkomuniversity.iflab.spriflab;
+package com.telkomuniversity.iflab.spriflab.Activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.telkomuniversity.iflab.spriflab.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -26,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tvForm.setOnClickListener(this);
         tvTabel.setOnClickListener(this);
+
+        setTitle("Home");
 
     }
 

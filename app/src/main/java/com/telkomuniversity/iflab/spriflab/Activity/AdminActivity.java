@@ -1,9 +1,13 @@
-package com.telkomuniversity.iflab.spriflab;
+package com.telkomuniversity.iflab.spriflab.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import com.telkomuniversity.iflab.spriflab.Model.BookingInfo;
+import com.telkomuniversity.iflab.spriflab.R;
+import com.telkomuniversity.iflab.spriflab.Adapter.RecyclerViewAdminAdapter;
 
 import java.util.ArrayList;
 

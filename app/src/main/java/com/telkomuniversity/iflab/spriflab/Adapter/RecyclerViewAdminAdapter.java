@@ -1,4 +1,4 @@
-package com.telkomuniversity.iflab.spriflab;
+package com.telkomuniversity.iflab.spriflab.Adapter;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.telkomuniversity.iflab.spriflab.Model.BookingInfo;
+import com.telkomuniversity.iflab.spriflab.R;
 
 import java.util.ArrayList;
 
